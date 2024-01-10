@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        #big_box{
+            display: flex;
+            flex-direction: row;
+            width: 84rem;
+            justify-content: space-around;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="big_box">
+        <div>
+            <p style="display: flex;position: relative;left: 20rem;align-items: center;justify-content: center;"> Home page </p>
+            <br>
+            <br>
+            <br>
+            <br>
+            Enter your username
+            <br>
+            <input id="username">
+            <div>Create a group by entering a group name</div>
+            <form onsubmit="createGroup(event)">
+                <input id="grp_name">
+                <button type="button" onclick="createGroup(event)">Create and join</button>
+            </form>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+        </div>
+        <div>
+            Enter your username
+            <br>
+            <input id="join_username">
+            <div>Join a group by entering group ID</div>
+            <input id="grp_id">
+            <button type="button" onclick="joinGroup(event)">Join a group</button>
+        </div>
+    </div>
+
+    <script defer>
+        const grp_name = document.getElementById("grp_name");
+        const grp_id = document.getElementById("grp_id");
+        const username = document.getElementById("username");
+        const join_username = document.getElementById("join_username");
+        
+        
+        function generateUniqueId() {
+            const randomHex = Math.random().toString(16).slice(2);
+            const timestampHex = Date.now().toString(16);
+            const uniqueId = randomHex + timestampHex;
+            return uniqueId;
+        }
+
+        let createGroup = (event) => {
+            if((grp_name.value || username.value) === ""){
+            document.body.append(document.createTextNode("Both group Name and Username are required"))
+            document.body.append(document.createElement("br"))
+            return
+        }
+            event.preventDefault(); // Prevent default form submission
+            window.location.href = `http://127.0.0.1:8000/${generateUniqueId()}/${username.value}/${grp_name.value}`;
+        }
+
+        let joinGroup = (event) => {
+            event.preventDefault();
+        if((grp_id.value || join_username.value) === ""){
+            document.body.append(document.createTextNode("Both group ID and Username are required"))
+            document.body.append(document.createElement("br"))
+            return
+        }
+            window.location.href = `http://127.0.0.1:8000/${grp_id.value}/${join_username.value}`;
+        }
+    </script>
+</body>
+
+</html>

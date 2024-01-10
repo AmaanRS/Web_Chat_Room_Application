@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        #chat_area {
+            background: #000;
+            width: 83rem;
+            height: 29rem;
+            overflow-y: scroll;
+            overflow-x: hidden;
+
+        }
+
+        #chat_area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .left {
+            background-color: aqua;
+            width: 100%;
+            height: 10%;
+            display: flex;
+            flex-direction: row;
+            margin-top: 10px;
+            margin-bottom: 10px;
+
+        }
+
+        .right {
+            background-color: aqua;
+            width: 100%;
+            height: 10%;
+            display: flex;
+            flex-direction: row-reverse;
+            margin-top: 10px;
+            margin-bottom: 10px;
+
+        }
+
+        .center {
+            background-color: aqua;
+            width: 100%;
+            height: 10%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <%= room_id %>
+            <div id="chat_area">
+            </div>
+            <br>
+            Message
+            <input id="message">
+            <button type="submit" id="submit_btn">Send</button>
+            <br>
+            <br>
+            <br>
+            Send files
+            <input type="file" id="file_input">
+            <br>
+            <button id="send_pic">Send</button>
+            <br>
+            <br>
+    </div>
+</body>
+<script>
+    const socket = io();
+    const message = document.getElementById("message")
+    const username = '<%= username%>';
+    const room_id = '<%= room_id%>';
+    socket.emit("new_user", { "username": username, "room_id": room_id })
+    socket.on("user_joined", (data) => {
+        let new_div = document.createElement("div")
+        new_div.className = "center"
+        new_div.textContent = data.username + " has joined the chat"
+        document.getElementById("chat_area").appendChild(new_div)
+    })
+    socket.on("user_left", (data) => {
+        let new_div = document.createElement("div")
+        new_div.className = "center"
+        new_div.textContent = data.username + " has left the chat"
+        document.getElementById("chat_area").appendChild(new_div)
+    })
+
+
+    document.getElementById("submit_btn").addEventListener("click", (e) => {
+        e.preventDefault();
+        let messageValue = document.getElementById("message").value;
+        socket.emit("message_sent", { "message": messageValue })
+
+        document.getElementById("message").value = "";
+    });
+
+    socket.on("left_message_sent", (data) => {
+        let new_div = document.createElement("div")
+        new_div.className = "left"
+        new_div.textContent = data.message
+        document.getElementById("chat_area").appendChild(new_div)
+    })
+
+    socket.on("right_message_sent", (data) => {
+        let new_div = document.createElement("div")
+        new_div.className = "right"
+        new_div.textContent = data.message
+        document.getElementById("chat_area").appendChild(new_div)
+    })
+
+    document.getElementById("send_pic").addEventListener("click",(e)=>{
+        let file_input = document.getElementById("file_input")
+        // If file exists then emit the event
+        if(file_input.files.length != 0){
+            let selected_files = file_input.files[0]
+            socket.emit("upload", selected_files,selected_files.type);
+        }
+    })
+   
+</script>
+
+</html>
