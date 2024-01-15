@@ -36,6 +36,9 @@ io.on("connection",(socket)=>{
                 console.log("There is an error while writing the file")
                 console.log(err)
             })
+
+            //Try sending the file name instead of send bytes of the file....
+
             //Send an left and right socket event to client
             socket.to(socket.room_id).emit("left_file_sent",data,type)
             socket.emit("right_file_sent",data,type)
