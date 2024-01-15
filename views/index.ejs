@@ -33,7 +33,7 @@
 
         .right {
             background-color: aqua;
-            width: 100%;
+            width: 96%;
             height: 10%;
             display: flex;
             flex-direction: row-reverse;
@@ -52,6 +52,33 @@
             margin-top: 10px;
             margin-bottom: 10px;
         }
+
+        .left_file{
+            width: 100%;
+            margin: 50px;
+        }
+
+        .right_file{
+            width: 96%;
+            display: flex;
+            flex-direction: row-reverse;
+            margin-bottom: 50px;
+            margin-top: 50px;
+            padding-right: 50px;
+            
+        }
+
+        .img_file{
+            object-fit: contain;
+            width: 35%;
+        }
+
+        .any_file{
+            color: white;
+            border: 5px solid white;
+            padding: 10px;
+            margin: 10px;
+        }
     </style>
 </head>
 
@@ -59,6 +86,11 @@
     <div>
         <%= room_id %>
             <div id="chat_area">
+                <!-- <object data="data" type="pdf" width="300" height="200">
+                </object> -->
+                <div class="left_file">
+                    <a href="/45932090f5a6918d031026ad/1705302559789.pdf" target="_blank" class="any_file">PDFFFF here</a>
+                </div>
             </div>
             <br>
             Message
@@ -73,6 +105,7 @@
             <button id="send_pic">Send</button>
             <br>
             <br>
+            
     </div>
 </body>
 <script>
@@ -122,9 +155,52 @@
         // If file exists then emit the event
         if(file_input.files.length != 0){
             let selected_files = file_input.files[0]
-            socket.emit("upload", selected_files,selected_files.type);
+            socket.emit("send_file", selected_files,selected_files.type);
         }
     })
+
+    //Currently only images can be sent testing for other types are left
+    socket.on("left_file_sent",(data,type)=>{
+        let new_div = document.createElement("div")
+        new_div.className = "left_file"
+        console.log("This is the type.......")
+        console.log(type)
+        if(type.split("/")[0] == "image"){
+            let new_img_tag = document.createElement("img")
+            new_img_tag.className = "img_file"
+            new_img_tag.src = "data:image;base64,"+arrayBufferToBase64(data)
+            new_div.appendChild(new_img_tag)
+        }else{
+            let new_anchor_tag = document.createElement("a")
+            new_anchor_tag.className = "any_file"
+            // new_anchor_tag.target = "_blank"
+            new_anchor_tag.textContent = type.split("/")[1]
+            new_anchor_tag.href = `data:${type};base64,${arrayBufferToBase64(data)}`
+            new_div.appendChild(new_anchor_tag)
+        }
+        document.getElementById("chat_area").appendChild(new_div)
+    })
+
+    socket.on("right_file_sent",(data,type)=>{
+        console.log(data)
+        let new_div = document.createElement("div")
+        new_div.className = "right_file"
+        let new_img_tag = document.createElement("img")
+        new_img_tag.className = "img_file"
+        new_img_tag.src = "data:image;base64,"+arrayBufferToBase64(data)
+        new_div.appendChild(new_img_tag)
+        document.getElementById("chat_area").appendChild(new_div)
+
+    })
+
+    function arrayBufferToBase64(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    }
    
 </script>
 

@@ -2,8 +2,10 @@ const express = require('express')
 const app = express();
 const server = require("http").Server(app)
 const io = require("socket.io")(server,{maxHttpBufferSize:1e10})
-const { writeFile, mkdirSync,existsSync, writeFileSync } = require("fs");
+const { mkdirSync,existsSync, writeFileSync, rm } = require("fs");
 const { v4: uuidv4 } = require("uuid");
+
+app.use(express.static("HDD"))
 
 app.set("view engine", "ejs")
 
@@ -19,7 +21,7 @@ io.on("connection",(socket)=>{
             socket.emit("right_message_sent",{'message':data.message})
         })
 
-        socket.on("upload",(data,type)=>{
+        socket.on("send_file",(data,type)=>{
             // Create a name for folder which is for a room
             let to_create_dir = __dirname + "/HDD/" +socket.room_id
 
@@ -34,30 +36,29 @@ io.on("connection",(socket)=>{
                 console.log("There is an error while writing the file")
                 console.log(err)
             })
-            
-
-            // if(data){
-            //     writeFile("temp/b.png",data,(err)=>{
-            //         console.log(err)
-            //     })
-            // }
+            //Send an left and right socket event to client
+            socket.to(socket.room_id).emit("left_file_sent",data,type)
+            socket.emit("right_file_sent",data,type)
         })
-        
-
-        
     })
+
+    socket.on("disconnecting",(reason)=>{
+        const thisRooms = io.sockets.adapter.rooms.get(socket.room_id)
+        let to_create_dir = __dirname + "/HDD/" +socket.room_id
+        //This means that last socket is disconnecting and the room will be empty
+        if(thisRooms && thisRooms.size == 1){
+            if(existsSync(to_create_dir)){
+                rm(to_create_dir,{recursive:true},(error)=>{
+                    console.log("There is error in deleting the folder")
+                })
+            }
+        }
+    })
+
+
     socket.on("disconnect",(reason)=>{
         socket.leave(socket.room_id)
         socket.to(socket.room_id).emit("user_left",{"username":socket.username})
-        //Checks if the room is empty
-        // Checks if everyone has left the room
-        const isroomEmpty = io.sockets.adapter.rooms.get(socket.room_id) === undefined
-
-        // How to get the name of the folder here
-        console.log(to_create_dir)
-        if(isroomEmpty){
-        }
-        
     })
 })
 
