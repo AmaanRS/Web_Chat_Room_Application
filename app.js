@@ -37,7 +37,7 @@ io.on("connection",(socket)=>{
                 console.log(err)
             })
 
-            //Try sending the file name instead of send bytes of the file....try branch
+            //Try sending the file name instead of send bytes of the file....try branch test2
 
             //Send an left and right socket event to client
             socket.to(socket.room_id).emit("left_file_sent",data,type)
