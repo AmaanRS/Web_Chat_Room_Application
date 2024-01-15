@@ -37,11 +37,9 @@ io.on("connection",(socket)=>{
                 console.log(err)
             })
 
-            //Try sending the file name instead of send bytes of the file...
-
             //Send an left and right socket event to client
-            socket.to(socket.room_id).emit("left_file_sent",data,type)
-            socket.emit("right_file_sent",data,type)
+            socket.to(socket.room_id).emit("left_file_sent",type,file_name)
+            socket.emit("right_file_sent",type,file_name)
         })
     })
 
@@ -50,7 +48,9 @@ io.on("connection",(socket)=>{
         let to_create_dir = __dirname + "/HDD/" +socket.room_id
         //This means that last socket is disconnecting and the room will be empty
         if(thisRooms && thisRooms.size == 1){
+            //If the folder exists
             if(existsSync(to_create_dir)){
+                //Remove the folder as well as the files inside it
                 rm(to_create_dir,{recursive:true},(error)=>{
                     console.log("There is error in deleting the folder")
                 })

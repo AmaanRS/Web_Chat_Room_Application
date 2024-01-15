@@ -86,11 +86,6 @@
     <div>
         <%= room_id %>
             <div id="chat_area">
-                <!-- <object data="data" type="pdf" width="300" height="200">
-                </object> -->
-                <div class="left_file">
-                    <a href="/45932090f5a6918d031026ad/1705302559789.pdf" target="_blank" class="any_file">PDFFFF here</a>
-                </div>
             </div>
             <br>
             Message
@@ -160,47 +155,63 @@
     })
 
     //Currently only images can be sent testing for other types are left
-    socket.on("left_file_sent",(data,type)=>{
+    socket.on("left_file_sent",(type,file_name)=>{
         let new_div = document.createElement("div")
         new_div.className = "left_file"
-        console.log("This is the type.......")
-        console.log(type)
+        //If the file is an image
         if(type.split("/")[0] == "image"){
             let new_img_tag = document.createElement("img")
             new_img_tag.className = "img_file"
-            new_img_tag.src = "data:image;base64,"+arrayBufferToBase64(data)
+            new_img_tag.src = file_name.split("HDD")[1]
             new_div.appendChild(new_img_tag)
-        }else{
+        }
+        //If the file is some other multimedia
+        else{
             let new_anchor_tag = document.createElement("a")
             new_anchor_tag.className = "any_file"
-            // new_anchor_tag.target = "_blank"
+            new_anchor_tag.target = "_blank"
             new_anchor_tag.textContent = type.split("/")[1]
-            new_anchor_tag.href = `data:${type};base64,${arrayBufferToBase64(data)}`
+            new_anchor_tag.href = file_name.split("HDD")[1]
             new_div.appendChild(new_anchor_tag)
         }
+        //Add the newly made div to the chat area
         document.getElementById("chat_area").appendChild(new_div)
     })
 
-    socket.on("right_file_sent",(data,type)=>{
-        console.log(data)
+    socket.on("right_file_sent",(type,file_name)=>{
         let new_div = document.createElement("div")
         new_div.className = "right_file"
-        let new_img_tag = document.createElement("img")
-        new_img_tag.className = "img_file"
-        new_img_tag.src = "data:image;base64,"+arrayBufferToBase64(data)
-        new_div.appendChild(new_img_tag)
+        //If the file is an image
+        if(type.split("/")[0] == "image"){
+            let new_img_tag = document.createElement("img")
+            new_img_tag.className = "img_file"
+            new_img_tag.src = file_name.split("HDD")[1]
+            new_div.appendChild(new_img_tag)
+        }
+        //If the file is some other multimedia
+        else{
+            let new_anchor_tag = document.createElement("a")
+            new_anchor_tag.className = "any_file"
+            new_anchor_tag.target = "_blank"
+            new_anchor_tag.textContent = type.split("/")[1]
+            new_anchor_tag.href = file_name.split("HDD")[1]
+            new_div.appendChild(new_anchor_tag)
+        }
+        //Add the newly made div to the chat area
         document.getElementById("chat_area").appendChild(new_div)
-
     })
 
-    function arrayBufferToBase64(buffer) {
-        let binary = '';
-        const bytes = new Uint8Array(buffer);
-        for (let i = 0; i < bytes.byteLength; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return btoa(binary);
-    }
+
+    //Used when passing bytes from client to server during file sharing
+    //Previously used method for sharing files
+    // function arrayBufferToBase64(buffer) {
+    //     let binary = '';
+    //     const bytes = new Uint8Array(buffer);
+    //     for (let i = 0; i < bytes.byteLength; i++) {
+    //         binary += String.fromCharCode(bytes[i]);
+    //     }
+    //     return btoa(binary);
+    // }
    
 </script>
 
