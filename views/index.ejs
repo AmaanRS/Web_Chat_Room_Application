@@ -79,6 +79,12 @@
             padding: 10px;
             margin: 10px;
         }
+        #chat_options{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
     </style>
 </head>
 
@@ -87,19 +93,37 @@
         <%= room_id %>
             <div id="chat_area">
             </div>
-            <br>
-            Message
-            <input id="message">
-            <button type="submit" id="submit_btn">Send</button>
-            <br>
-            <br>
-            <br>
-            Send files
-            <input type="file" id="file_input">
-            <br>
-            <button id="send_pic">Send</button>
-            <br>
-            <br>
+            <div id="chat_options">
+                <div>
+                    <br>
+                    Message
+                    <input id="message">
+                    <button type="submit" id="submit_btn">Send</button>
+                    <br>
+                </div>
+                <div>
+                    <br>
+                    <br>
+                    Send files
+                    <input type="file" id="file_input">
+                    <br>
+                    <button id="send_pic">Send</button>
+                    <br>
+                    <br>
+                </div>
+                <div>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    Record audio
+                    <button id="start_record">Start recording</button>
+                    <button id="stop_record">Stop recording</button>
+                    <button id="send_record">Send Audio</button>
+<!--                 Will see if this button is required
+                    <button>Remove present recording</button> -->
+                </div>
+            </div>
             
     </div>
 </body>
@@ -200,6 +224,57 @@
         //Add the newly made div to the chat area
         document.getElementById("chat_area").appendChild(new_div)
     })
+    let audioRecorder = {
+        //To store the audio in the array
+        audioBlobs:[],
+
+        //To store the reference of MediaRecorder object(MDN)
+        mediaRecorder:null,
+
+        //To store the reference of the stream of audio
+        streamBeingCaptured:null,
+
+        start_record:(
+        document.getElementById("start_record").addEventListener("click",(e)=>{
+        // Check if there are media devices and can they be used
+        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+            //Only asked for audio 
+            navigator.mediaDevices.getUserMedia({audio:true})
+            .then((stream)=>{
+
+                //Gave stream reference
+                audioRecorder.streamBeingCaptured = stream;
+
+                //Created a MediaRecorder
+                audioRecorder.mediaRecorder = new MediaRecorder(stream);
+
+                //Emptied the previous audio data if any
+                audioRecorder.audioBlobs = [];
+
+                //If there is audio data coming then push the data into the array
+                audioRecorder.mediaRecorder.addEventListener("dataavailable",(event)=>{
+                    audioRecorder.audioBlobs.push(event.data)
+                })
+
+                //Start the recording
+                audioRecorder.mediaRecorder.start();
+                console.log(audioRecorder.audioBlobs)
+
+            })
+            .catch((err)=>{
+                console.log("This is in err of audio")
+                console.log(err)
+                alert("Please allow the usage of microphone to record audio")
+            })
+        }
+    })
+),      //Implement the stop function (Incomplete)
+        stop_record:(
+            document.getElementById("stop_record").addEventListener("click",(e)=>{
+                audioRecorder.mediaRecorder.stop();
+            })
+        )
+}
 
 
     //Used when passing bytes from client to server during file sharing
