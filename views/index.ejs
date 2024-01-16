@@ -120,8 +120,6 @@
                     <button id="start_record">Start recording</button>
                     <button id="stop_record">Stop recording</button>
                     <button id="send_record">Send Audio</button>
-<!--                 Will see if this button is required
-                    <button>Remove present recording</button> -->
                 </div>
             </div>
             
@@ -178,7 +176,6 @@
         }
     })
 
-    //Currently only images can be sent testing for other types are left
     socket.on("left_file_sent",(type,file_name)=>{
         let new_div = document.createElement("div")
         new_div.className = "left_file"
@@ -190,6 +187,7 @@
             new_div.appendChild(new_img_tag)
         }
         //If the file is some other multimedia
+        //Try using <audio> and <video> for audio and video files
         else{
             let new_anchor_tag = document.createElement("a")
             new_anchor_tag.className = "any_file"
@@ -224,7 +222,43 @@
         //Add the newly made div to the chat area
         document.getElementById("chat_area").appendChild(new_div)
     })
-    let audioRecorder = {
+
+
+document.getElementById("start_record").addEventListener("click",(e)=>{
+        audioRecorder.start_record()
+            .then(() => { //on success
+                console.log("Recording Audio...")    
+            }) 
+            .catch(error => { //on error
+                //No Browser Support Error
+                if (error.message.includes("mediaDevices API or getUserMedia method is not supported in this browser.")) {       
+                    console.log("To record audio, use browsers like Chrome and Firefox.");
+                }
+            });
+    })
+
+document.getElementById("stop_record").addEventListener("click",(e)=>{
+        audioRecorder.stop_record()
+        .then((audioAsblob) => { //stopping makes promise resolves to the blob file of the recorded audio
+        socket.emit("send_file",audioAsblob.audioBlob,audioAsblob.mimeType.split(";")[0])
+            
+        })
+        .catch(error => {
+            //Error handling structure
+            switch (error.name) {
+                case 'InvalidStateError': //error from the MediaRecorder.stop
+                    console.log("An InvalidStateError has occured.");
+                    break;
+                default:
+                    console.log("An error occured with the error name " + error.name);
+            };
+ 
+        });
+
+    })
+
+var audioRecorder = {
+        
         //To store the audio in the array
         audioBlobs:[],
 
@@ -234,15 +268,17 @@
         //To store the reference of the stream of audio
         streamBeingCaptured:null,
 
-        start_record:(
-        document.getElementById("start_record").addEventListener("click",(e)=>{
+    start_record:function(){
+        
         // Check if there are media devices and can they be used
         if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-            //Only asked for audio 
-            navigator.mediaDevices.getUserMedia({audio:true})
+
+            //Only ask for audio
+            //If getUserMedia return a successful promise then the function returns successful and then statement is executed
+            return navigator.mediaDevices.getUserMedia({audio:true})
             .then((stream)=>{
 
-                //Gave stream reference
+                //Stored stream reference
                 audioRecorder.streamBeingCaptured = stream;
 
                 //Created a MediaRecorder
@@ -258,8 +294,6 @@
 
                 //Start the recording
                 audioRecorder.mediaRecorder.start();
-                console.log(audioRecorder.audioBlobs)
-
             })
             .catch((err)=>{
                 console.log("This is in err of audio")
@@ -267,18 +301,51 @@
                 alert("Please allow the usage of microphone to record audio")
             })
         }
-    })
-),      //Implement the stop function (Incomplete)
-        stop_record:(
-            document.getElementById("stop_record").addEventListener("click",(e)=>{
+},      
+        stop_record:function(){
+        return new Promise(resolve => {
+            //save audio type to pass to set the Blob type
+            let mimeType = audioRecorder.mediaRecorder.mimeType;
+ 
+            //listen to the stop event in order to create & return a single Blob object
+            audioRecorder.mediaRecorder.addEventListener("stop", () => {
+                //create a single blob object, as we might have gathered a few Blob objects that needs to be joined as one
+                let audioBlob = new Blob(audioRecorder.audioBlobs, { type: mimeType });
+ 
+                //resolve promise with the single audio blob representing the recorded audio
+                resolve({audioBlob,mimeType});
+            });
+                //Stop the recording
                 audioRecorder.mediaRecorder.stop();
-            })
-        )
+
+                // Stop the ongoing audio Stream
+                audioRecorder.stopStream();
+
+                //Reset API properties for the next recording
+                audioRecorder.resetRecordingProperties();
+        })
+        },
+        stopStream:function(){
+            //Take the reference of the active stream and get all tracks from it then stops each ongoing track
+            audioRecorder.streamBeingCaptured.getTracks().forEach(track => {
+                track.stop();
+            });
+        },
+        resetRecordingProperties:function(){
+        audioRecorder.mediaRecorder = null;
+        audioRecorder.streamBeingCaptured = null;
+ 
+        /*No need to remove event listeners attached to mediaRecorder as
+        If a DOM element which is removed is reference-free (no references pointing to it), the element itself is picked
+        up by the garbage collector as well as any event handlers/listeners associated with it.
+        getEventListeners(audioRecorder.mediaRecorder) will return an empty array of events.*/
+        }
 }
 
 
     //Used when passing bytes from client to server during file sharing
     //Previously used method for sharing files
+
     // function arrayBufferToBase64(buffer) {
     //     let binary = '';
     //     const bytes = new Uint8Array(buffer);
@@ -287,6 +354,55 @@
     //     }
     //     return btoa(binary);
     // }
+
+
+    //Simpler method to record audio
+    //Did'nt implement just pasted here to learn
+
+    //     document.addEventListener('DOMContentLoaded', () => {
+    //     const startRecordButton = document.getElementById('startRecord');
+    //     const stopRecordButton = document.getElementById('stopRecord');
+    //     const audioPlayer = document.getElementById('audioPlayer');
+        
+    //     let mediaRecorder;
+    //     let audioChunks = [];
+
+    //     startRecordButton.addEventListener('click', startRecording);
+    //     stopRecordButton.addEventListener('click', stopRecording);
+
+    //     function startRecording() {
+    //         navigator.mediaDevices.getUserMedia({ audio: true })
+    //             .then((stream) => {
+    //                 mediaRecorder = new MediaRecorder(stream);
+
+    //                 mediaRecorder.ondataavailable = (event) => {
+    //                     if (event.data.size > 0) {
+    //                         audioChunks.push(event.data);
+    //                     }
+    //                 };
+
+    //                 mediaRecorder.onstop = () => {
+    //                     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+    //                     audioPlayer.src = URL.createObjectURL(audioBlob);
+    //                 };
+
+    //                 mediaRecorder.start();
+    //                 startRecordButton.disabled = true;
+    //                 stopRecordButton.disabled = false;
+    //             })
+    //             .catch((error) => {
+    //                 console.error('Error accessing microphone:', error);
+    //             });
+    //     }
+
+    //     function stopRecording() {
+    //         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    //             mediaRecorder.stop();
+    //             startRecordButton.disabled = false;
+    //             stopRecordButton.disabled = true;
+    //         }
+    //     }
+    // });
    
 </script>
 
