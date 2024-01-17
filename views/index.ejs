@@ -125,7 +125,7 @@
                     Camera
                     <button id="open_camera">Open camera</button>
                     <button id="click_picture">Click picture</button>
-                    <button id="send_picture">Send image</button>
+                    <!-- <button id="send_picture">Send image</button> -->
                 </div>
             </div>
             
@@ -353,8 +353,10 @@ document.getElementById("open_camera").addEventListener("click",async(e)=>{
 
     if(cameraa.open_camera()){
         //Camera is open
+        console.log("Camera is Opened now")
     }else{
         //Camera is not open
+        console.log("The Camera cannot be opened")
     }
 })
 
@@ -362,7 +364,8 @@ document.getElementById("click_picture").addEventListener("click",async(e)=>{
     const imageBlob = await cameraa.click_picture()
     if(imageBlob){
         //Image is taken
-        // console.log(imageBlob)
+        socket.emit("send_file",imageBlob,"image/png")
+        console.log("Camera is closed now")
     }else{
         //No image
         console.log("The picture cannot be taken")
@@ -392,7 +395,7 @@ var cameraa = {
             const track = cameraa.mediaStream.getVideoTracks()[0];
             const imageCapture = new ImageCapture(track)
             const imageBlob = await imageCapture.takePhoto() 
-            cameraa.stopStream()  
+            cameraa.stopStream() 
             return imageBlob
         }else{
             console.log("No media stream");
@@ -404,6 +407,7 @@ var cameraa = {
             cameraa.mediaStream.getTracks().forEach((track)=>{
                 track.stop();
             })
+            mediaStream = null;
         }
     })
 }
