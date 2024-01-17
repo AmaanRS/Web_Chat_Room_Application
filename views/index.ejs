@@ -119,7 +119,13 @@
                     Record audio
                     <button id="start_record">Start recording</button>
                     <button id="stop_record">Stop recording</button>
-                    <button id="send_record">Send Audio</button>
+                    <!-- <button id="send_record">Send Audio</button> -->
+                </div>
+                <div>
+                    Camera
+                    <button id="open_camera">Open camera</button>
+                    <button id="click_picture">Click picture</button>
+                    <button id="send_picture">Send image</button>
                 </div>
             </div>
             
@@ -340,6 +346,66 @@ var audioRecorder = {
         up by the garbage collector as well as any event handlers/listeners associated with it.
         getEventListeners(audioRecorder.mediaRecorder) will return an empty array of events.*/
         }
+}
+
+document.getElementById("open_camera").addEventListener("click",async(e)=>{
+    const cameraOpen = await cameraa.open_camera();
+
+    if(cameraa.open_camera()){
+        //Camera is open
+    }else{
+        //Camera is not open
+    }
+})
+
+document.getElementById("click_picture").addEventListener("click",async(e)=>{
+    const imageBlob = await cameraa.click_picture()
+    if(imageBlob){
+        //Image is taken
+        // console.log(imageBlob)
+    }else{
+        //No image
+        console.log("The picture cannot be taken")
+    }
+})
+
+
+
+
+var cameraa = {
+    mediaStream:null,
+    open_camera:(function(){
+        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+            return navigator.mediaDevices.getUserMedia({video:true}).then((stream)=>{
+                cameraa.mediaStream = stream;
+                return true
+            })
+            .catch((err)=>{
+                console.log(err)
+                alert("Please allow the usage of camera to click a photo")
+                return false
+            })
+        }
+    }),
+    click_picture:(async function(){
+        if(cameraa.mediaStream){
+            const track = cameraa.mediaStream.getVideoTracks()[0];
+            const imageCapture = new ImageCapture(track)
+            const imageBlob = await imageCapture.takePhoto() 
+            cameraa.stopStream()  
+            return imageBlob
+        }else{
+            console.log("No media stream");
+            return null
+        }
+    }),
+    stopStream:( function(){
+        if(cameraa.mediaStream){
+            cameraa.mediaStream.getTracks().forEach((track)=>{
+                track.stop();
+            })
+        }
+    })
 }
 
 
