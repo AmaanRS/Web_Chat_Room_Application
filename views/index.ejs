@@ -407,6 +407,8 @@ var cameraa = {
     open_camera:(function(){
         if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
             return navigator.mediaDevices.getUserMedia({video:true}).then((stream)=>{
+
+                create_video_tag(stream)
                 cameraa.mediaStream = stream;
                 return true
             })
@@ -421,8 +423,9 @@ var cameraa = {
         if(cameraa.mediaStream){
             const track = cameraa.mediaStream.getVideoTracks()[0];
             const imageCapture = new ImageCapture(track)
-            const imageBlob = await imageCapture.takePhoto() 
-            cameraa.stopStream() 
+            const imageBlob = await imageCapture.takePhoto()
+            remove_video_tag()
+            cameraa.stopStream()
             return imageBlob
         }else{
             console.log("No media stream");
@@ -431,12 +434,35 @@ var cameraa = {
     }),
     stopStream:( function(){
         if(cameraa.mediaStream){
-            cameraa.mediaStream.getTracks().forEach((track)=>{
-                track.stop();
-            })
+            cameraa.mediaStream.getTracks().forEach(function(track) {
+                    track.stop();
+            });
             mediaStream = null;
+            
         }
     })
+}
+
+function create_video_tag(stream){
+    let video_tag_exist = document.querySelector("video")
+    if(video_tag_exist){
+        return
+    }
+    let new_video_tag = document.createElement("video")
+    let temp_chat_area = document.getElementById("chat_area")
+    temp_chat_area.appendChild(new_video_tag) 
+    new_video_tag.srcObject = stream
+    new_video_tag.onloadedmetadata = function(e){
+        new_video_tag.play()
+    }
+}
+
+function remove_video_tag(){
+    let video_tag_exist = document.querySelector("video")
+    if(video_tag_exist){
+        video_tag_exist.parentElement.removeChild(video_tag_exist)
+        return
+    }
 }
 
 
