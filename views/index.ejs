@@ -85,6 +85,14 @@
             align-items: center;
             height: 60px;
         }
+        .left_audio{
+            padding: 4rem;
+        }
+        .right_audio{
+            display: flex;
+            flex-direction: row-reverse;
+            padding: 4rem;
+        }
     </style>
 </head>
 
@@ -92,6 +100,7 @@
     <div>
         <%= room_id %>
             <div id="chat_area">
+                <!-- <video controls src="/4ac9f38120e9b18d1b649878/1705561803444.png"></video> -->
             </div>
             <div id="chat_options">
                 <div>
@@ -185,15 +194,25 @@
     socket.on("left_file_sent",(type,file_name)=>{
         let new_div = document.createElement("div")
         new_div.className = "left_file"
+        let check_type = type.split("/")[0]
+        let to_give_file_name = file_name.split("HDD")[1]
+
         //If the file is an image
-        if(type.split("/")[0] == "image"){
+        if(check_type == "image"){
             let new_img_tag = document.createElement("img")
             new_img_tag.className = "img_file"
-            new_img_tag.src = file_name.split("HDD")[1]
+            new_img_tag.src = to_give_file_name
             new_div.appendChild(new_img_tag)
+        }else if(check_type == "audio"){
+            //Change the className of div tag from left_file to left_audio
+            new_div.className = "left_audio"
+            let new_audio_tag = document.createElement("audio")
+            new_audio_tag.setAttribute("controls","")
+            new_audio_tag.src = to_give_file_name
+            new_div.appendChild(new_audio_tag)
         }
+        //Try using <video> for video files
         //If the file is some other multimedia
-        //Try using <audio> and <video> for audio and video files
         else{
             let new_anchor_tag = document.createElement("a")
             new_anchor_tag.className = "any_file"
@@ -215,6 +234,13 @@
             new_img_tag.className = "img_file"
             new_img_tag.src = file_name.split("HDD")[1]
             new_div.appendChild(new_img_tag)
+        }else if(type.split("/")[0] == "audio"){
+            //Change the className of div tag from right_file to right_audio
+            new_div.className = "right_audio"
+            let new_audio_tag = document.createElement("audio")
+            new_audio_tag.setAttribute("controls","")
+            new_audio_tag.src = file_name.split("HDD")[1]
+            new_div.appendChild(new_audio_tag)
         }
         //If the file is some other multimedia
         else{
@@ -262,7 +288,8 @@ document.getElementById("stop_record").addEventListener("click",(e)=>{
         });
 
     })
-//This feature does'nt work in mobile
+//This feature requires to use send file option then record an audio and then send it in a mobile
+//The audio sent using this method gets stored in the mobile's storage
 var audioRecorder = {
         
         //To store the audio in the array
@@ -375,7 +402,6 @@ document.getElementById("click_picture").addEventListener("click",async(e)=>{
 
 
 //This feature does'nt work in mobile
-//AUDIO_VIDEO_BRANCH nnn
 var cameraa = {
     mediaStream:null,
     open_camera:(function(){
