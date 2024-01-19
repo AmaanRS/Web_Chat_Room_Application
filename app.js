@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express();
 const server = require("http").Server(app)
+//To increase the size of files that can be sent or received through socket
 const io = require("socket.io")(server,{maxHttpBufferSize:1e10})
 const { mkdirSync,existsSync, writeFileSync, rm } = require("fs");
 const { v4: uuidv4 } = require("uuid");
