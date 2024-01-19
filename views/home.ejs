@@ -72,6 +72,7 @@
             return
         }
             event.preventDefault(); // Prevent default form submission
+            //Try using axios to send request then render a different page from there maybe the deployed app will work
             window.location.href = `${domain}/${generateUniqueId()}/${username.value}/${grp_name.value}`;
             // window.location.href = `${domain}:${port}/${generateUniqueId()}/${username.value}/${grp_name.value}`;
         }
@@ -83,6 +84,7 @@
             document.body.append(document.createElement("br"))
             return
         }
+            //Try using axios to send request then render a different page from there maybe the deployed app will work
             window.location.href = `${domain}/${grp_id.value}/${join_username.value}`;
             // window.location.href = `${domain}:${port}/${grp_id.value}/${join_username.value}`;
         }
