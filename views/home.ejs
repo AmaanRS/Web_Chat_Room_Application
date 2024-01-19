@@ -72,7 +72,8 @@
             return
         }
             event.preventDefault(); // Prevent default form submission
-            window.location.href = `${domain}:${port}/${generateUniqueId()}/${username.value}/${grp_name.value}`;
+            window.location.href = `${domain}/${generateUniqueId()}/${username.value}/${grp_name.value}`;
+            // window.location.href = `${domain}:${port}/${generateUniqueId()}/${username.value}/${grp_name.value}`;
         }
 
         let joinGroup = (event) => {
@@ -82,7 +83,8 @@
             document.body.append(document.createElement("br"))
             return
         }
-            window.location.href = `${domain}:${port}/${grp_id.value}/${join_username.value}`;
+            window.location.href = `${domain}/${grp_id.value}/${join_username.value}`;
+            // window.location.href = `${domain}:${port}/${grp_id.value}/${join_username.value}`;
         }
     </script>
 </body>
