@@ -54,6 +54,8 @@
         const grp_id = document.getElementById("grp_id");
         const username = document.getElementById("username");
         const join_username = document.getElementById("join_username");
+        let domain = '<%= process.env.DOMAIN %>'
+        let port = '<%= process.env.PORT %>'
         
         
         function generateUniqueId() {
@@ -70,7 +72,7 @@
             return
         }
             event.preventDefault(); // Prevent default form submission
-            window.location.href = `http://127.0.0.1:8000/${generateUniqueId()}/${username.value}/${grp_name.value}`;
+            window.location.href = `${domain}:${port}/${generateUniqueId()}/${username.value}/${grp_name.value}`;
         }
 
         let joinGroup = (event) => {
@@ -80,7 +82,7 @@
             document.body.append(document.createElement("br"))
             return
         }
-            window.location.href = `http://127.0.0.1:8000/${grp_id.value}/${join_username.value}`;
+            window.location.href = `${domain}:${port}/${grp_id.value}/${join_username.value}`;
         }
     </script>
 </body>

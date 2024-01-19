@@ -3,6 +3,7 @@ const app = express();
 const server = require("http").Server(app)
 const io = require("socket.io")(server,{maxHttpBufferSize:1e10})
 const { mkdirSync,existsSync, writeFileSync, rm } = require("fs");
+require('dotenv').config()
 const { v4: uuidv4 } = require("uuid");
 
 app.use(express.static("HDD"))
@@ -20,7 +21,7 @@ io.on("connection",(socket)=>{
             socket.to(socket.room_id).emit("left_message_sent",{'message':data.message})
             socket.emit("right_message_sent",{'message':data.message})
         })
-//
+
         socket.on("send_file",(data,type)=>{
             // Create a name for folder which is for a room
             let to_create_dir = __dirname + "/HDD/" +socket.room_id
@@ -83,4 +84,4 @@ app.get("/:room_id/:username",(req,res)=>{
 })
 
 
-server.listen(8000)
+server.listen(process.env.PORT)
