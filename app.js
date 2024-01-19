@@ -20,7 +20,7 @@ io.on("connection",(socket)=>{
             socket.to(socket.room_id).emit("left_message_sent",{'message':data.message})
             socket.emit("right_message_sent",{'message':data.message})
         })
-
+//
         socket.on("send_file",(data,type)=>{
             // Create a name for folder which is for a room
             let to_create_dir = __dirname + "/HDD/" +socket.room_id
